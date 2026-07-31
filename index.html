@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For You, My Love</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Great+Vibes&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        burgundy: '#6b1d3a',
+                        'deep-rose': '#8b2252',
+                        'soft-pink': '#d4a0b0',
+                        'warm-gold': '#c9a84c',
+                        'rose-gold': '#b76e79',
+                        cream: '#fdf6f0',
+                        'dark-bg': '#0d0a12',
+                        midnight: '#120e1a',
+                    },
+                    fontFamily: {
+                        script: ['Great Vibes', 'cursive'],
+                        serif: ['Cormorant Garamond', 'serif'],
+                        body: ['Lora', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        html,body{font-family:'Lora',serif;background:#0d0a12;color:#fdf6f0;overflow:hidden;height:100%;width:100%}
+
+        /* ============================================================
+           Responsive Layout — full screen on all devices
+           ============================================================ */
+        #appFrame{position:relative;width:100%;height:100%;overflow:hidden}
+
+        /* ============================================================
+           Floral Corners
+           ============================================================ */
+        .fc{position:absolute;width:16vw;height:16vw;min-width:70px;min-height:70px;max-width:150px;max-height:150px;pointer-events:none;z-index:60;opacity:.45}
+        .fc svg{width:100%;height:100%}
+        .fc.tl{top:8px;left:8px}
+        .fc.tr{top:8px;right:8px;transform:scaleX(-1)}
+        .fc.bl{bottom:8px;left:8px;transform:scaleY(-1)}
+        .fc.br{bottom:8px;right:8px;transform:scale(-1,-1)}
+        .floral-border{position:absolute;inset:8px;border:1px solid rgba(201,168,76,.08);border-radius:14px;pointer-events:none;z-index:59}
+
+        /* ============================================================
+           Canvases
+           ============================================================ */
+        #roseCanvas,#sparkleCanvas,#petalCanvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+        #roseCanvas{z-index:45}
+        #sparkleCanvas{z-index:50;opacity:0;transition:opacity 1.5s ease}
+        #sparkleCanvas.on{opacity:1}
+        #petalCanvas{z-index:55}
+
+        /* ============================================================
+           Core Animations
+           ============================================================ */
+        @keyframes ambientDrift{0%{transform:translate(0,0) rotate(0deg)}100%{transform:translate(-3%,-2%) rotate(2deg)}}
+        @keyframes softGlow{0%,100%{box-shadow:0 0 20px rgba(201,168,76,.3),0 0 40px rgba(201,168,76,.1)}50%{box-shadow:0 0 30px rgba(201,168,76,.5),0 0 60px rgba(201,168,76,.2)}}
+        @keyframes sealWobble{0%,100%{transform:translate(-50%,-50%) rotate(0deg)}25%{transform:translate(-50%,-50%) rotate(-3deg)}75%{transform:translate(-50%,-50%) rotate(3deg)}}
+        @keyframes heartBeat{0%,100%{transform:scale(1)}15%{transform:scale(1.3)}30%{transform:scale(1)}45%{transform:scale(1.2)}60%{transform:scale(1)}}
+        @keyframes musicBar{0%{transform:scaleY(.4)}100%{transform:scaleY(1)}}
+        @keyframes flameFlicker{0%,100%{transform:scaleY(1) scaleX(1) rotate(-2deg);opacity:1}25%{transform:scaleY(1.15) scaleX(.9) rotate(2deg);opacity:.9}50%{transform:scaleY(.9) scaleX(1.1) rotate(-1deg);opacity:1}75%{transform:scaleY(1.1) scaleX(.95) rotate(1deg);opacity:.85}}
+        @keyframes candleGlow{0%,100%{box-shadow:0 0 12px 4px rgba(255,200,100,.4),0 0 25px 8px rgba(255,180,80,.2)}50%{box-shadow:0 0 18px 6px rgba(255,200,100,.6),0 0 35px 12px rgba(255,180,80,.3)}}
+        @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+        @keyframes cakePulse{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
+        @keyframes smokeRise{0%{opacity:.7;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-40px) scale(2)}}
+
+        /* ============================================================
+           Phase 3: Happy Birthday heading — cracker reveal animation
+           ============================================================ */
+        @keyframes hbGlow{
+            0%,100%{text-shadow:0 0 30px rgba(201,168,76,.3),0 0 60px rgba(201,168,76,.1)}
+            50%{text-shadow:0 0 50px rgba(201,168,76,.6),0 0 100px rgba(201,168,76,.2)}
+        }
+        @keyframes hbReveal{
+            0%{opacity:0;transform:scale(0.5);filter:blur(20px);letter-spacing:30px}
+            60%{opacity:1;transform:scale(1.1);filter:blur(0);letter-spacing:8px}
+            100%{opacity:1;transform:scale(1);filter:blur(0);letter-spacing:6px}
+        }
+        #hbTitle.reveal{animation:hbReveal 1.5s cubic-bezier(.25,.46,.45,.94) forwards}
+
+        /* ============================================================
+           Phase 2: Cream-Spreading Frosting Reveal
+           ============================================================ */
+        .tier{position:relative}
+        .tier-body{position:relative;z-index:1}
+        .tier-cream{
+            position:absolute;top:0;left:0;width:100%;height:100%;z-index:2;
+            clip-path:polygon(0% 0%,0% 0%,0% 100%,0% 100%);
+        }
+        .tier-cream.spreading{
+            animation:creamSpread var(--spread-dur,1.1s) cubic-bezier(.25,.46,.45,.94) forwards;
+            animation-delay:var(--spread-delay,0s);
+        }
+        @keyframes creamSpread{
+            0%{clip-path:polygon(0% 0%,0% 0%,0% 100%,0% 100%)}
+            100%{clip-path:polygon(0% 0%,100% 0%,100% 100%,0% 100%)}
+        }
+        /* Spatula glow edge */
+        .tier-cream.spreading::after{
+            content:'';position:absolute;top:0;right:-2px;width:8px;height:100%;
+            background:linear-gradient(to right,rgba(245,230,211,.5),rgba(255,248,220,.2),transparent);
+            filter:blur(3px);animation:spatulaGlow calc(var(--spread-dur,1.1s) * .15) ease-in-out infinite alternate
+        }
+        @keyframes spatulaGlow{0%{opacity:.5}100%{opacity:1}}
+
+        .candles-wrap{opacity:0;transition:opacity .8s ease}
+        .candles-wrap.lit{opacity:1}
+        .flame{animation:flameFlicker .4s ease-in-out infinite;transform-origin:bottom center}
+        .flame.out{animation:none;opacity:0;transform:scaleY(0);transition:all .35s ease}
+        .candle-glow{animation:candleGlow 1.5s ease-in-out infinite}
+
+        /* ============================================================
+           Phase Layout
+           ============================================================ */
+        .phase{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 1.2s ease,visibility 1.2s ease}
+        .phase.off{opacity:0;visibility:hidden;pointer-events:none}
+        .phase2-layout{justify-content:center;gap:clamp(0.4rem,1.5vh,1rem)}
+
+        /* Card flip */
+        .flip-card{perspective:600px;width:clamp(128px,18vw,160px);height:clamp(160px,22vw,192px);cursor:pointer}
+        .flip-inner{position:relative;width:100%;height:100%;transition:transform .6s;transform-style:preserve-3d}
+        .flip-card.flipped .flip-inner{transform:rotateY(180deg)}
+        .flip-front,.flip-back{position:absolute;inset:0;backface-visibility:hidden;border-radius:1rem;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+        .flip-front{background:linear-gradient(135deg,rgba(107,29,58,.3),rgba(139,34,82,.2));border:1px solid rgba(201,168,76,.25)}
+        .flip-back{transform:rotateY(180deg);background:#1a0a15;border:1px solid rgba(201,168,76,.3)}
+        .flip-back img{width:100%;height:100%;object-fit:cover}
+
+        .ambient-glow::before{content:'';position:absolute;inset:-50%;width:200%;height:200%;background:radial-gradient(ellipse at 30% 40%,rgba(107,29,58,.18) 0%,transparent 50%),radial-gradient(ellipse at 70% 60%,rgba(183,110,121,.12) 0%,transparent 50%),radial-gradient(ellipse at 50% 80%,rgba(201,168,76,.08) 0%,transparent 40%);animation:ambientDrift 20s ease-in-out infinite alternate;pointer-events:none}
+
+        /* Floating hearts and flowers background */
+        .bg-hearts{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:2}
+        .bg-hearts span{position:absolute;font-size:clamp(12px,2vw,20px);opacity:.15;animation:bgFloat linear infinite}
+        .bg-hearts span:nth-child(1){left:5%;animation-duration:18s;animation-delay:0s}
+        .bg-hearts span:nth-child(2){left:15%;animation-duration:22s;animation-delay:2s}
+        .bg-hearts span:nth-child(3){left:25%;animation-duration:16s;animation-delay:4s}
+        .bg-hearts span:nth-child(4){left:35%;animation-duration:20s;animation-delay:1s}
+        .bg-hearts span:nth-child(5){left:45%;animation-duration:24s;animation-delay:3s}
+        .bg-hearts span:nth-child(6){left:55%;animation-duration:17s;animation-delay:5s}
+        .bg-hearts span:nth-child(7){left:65%;animation-duration:21s;animation-delay:0s}
+        .bg-hearts span:nth-child(8){left:75%;animation-duration:19s;animation-delay:2s}
+        .bg-hearts span:nth-child(9){left:85%;animation-duration:23s;animation-delay:4s}
+        .bg-hearts span:nth-child(10){left:92%;animation-duration:15s;animation-delay:1s}
+        @keyframes bgFloat{0%{transform:translateY(110vh) rotate(0deg);opacity:0}10%{opacity:.15}90%{opacity:.15}100%{transform:translateY(-10vh) rotate(360deg);opacity:0}}
+
+        ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#6b1d3a;border-radius:2px}
+    </style>
+</head>
+<body>
+<div id="appFrame" class="ambient-glow relative">
+
+    <!-- Tap-to-unlock overlay -->
+    <div id="unlockOverlay" class="absolute inset-0 z-[999] flex items-center justify-center bg-dark-bg/90 cursor-pointer" onclick="unlockSite()">
+        <div class="text-center">
+            <p class="font-script text-warm-gold mb-4" style="font-size:clamp(1.5rem,4vw,2.5rem)">A Special Surprise For You</p>
+            <p class="font-body text-soft-pink/60 mb-6" style="font-size:clamp(0.6rem,1vw,0.8rem)">Tap anywhere to begin</p>
+            <div class="w-16 h-16 mx-auto rounded-full border-2 border-warm-gold/40 flex items-center justify-center animate-pulse"><i class="fa-solid fa-heart text-warm-gold text-xl"></i></div>
+        </div>
+    </div>
+
+    <!-- Background hearts and flowers -->
+    <div class="bg-hearts">
+        <span>&#x1F338;</span><span>&#x2764;&#xFE0F;</span><span>&#x1F33A;</span><span>&#x1F49D;</span><span>&#x1F337;</span>
+        <span>&#x1F495;</span><span>&#x1F33C;</span><span>&#x2764;&#xFE0F;</span><span>&#x1F338;</span><span>&#x1F4AE;</span>
+    </div>
+
+    <!-- Floral corners -->
+    <div class="fc tl"><svg viewBox="0 0 120 120" fill="none"><path d="M10 110Q10 60 30 40Q50 20 60 10" stroke="#c9a84c" stroke-width="1.2" fill="none" opacity=".5"/><circle cx="30" cy="40" r="4" fill="#b76e79" opacity=".5"/><circle cx="15" cy="70" r="3" fill="#d4a0b0" opacity=".4"/><circle cx="50" cy="20" r="3.5" fill="#c9a84c" opacity=".4"/><path d="M20 90Q15 80 25 75" stroke="#6b8a5e" stroke-width="1" fill="none" opacity=".4"/><path d="M40 30Q45 25 38 20" stroke="#6b8a5e" stroke-width="1" fill="none" opacity=".4"/></svg></div>
+    <div class="fc tr"><svg viewBox="0 0 120 120" fill="none"><path d="M10 110Q10 60 30 40Q50 20 60 10" stroke="#c9a84c" stroke-width="1.2" fill="none" opacity=".5"/><circle cx="30" cy="40" r="4" fill="#b76e79" opacity=".5"/><circle cx="15" cy="70" r="3" fill="#d4a0b0" opacity=".4"/><circle cx="50" cy="20" r="3.5" fill="#c9a84c" opacity=".4"/><path d="M20 90Q15 80 25 75" stroke="#6b8a5e" stroke-width="1" fill="none" opacity=".4"/><path d="M40 30Q45 25 38 20" stroke="#6b8a5e" stroke-width="1" fill="none" opacity=".4"/></svg></div>
+    <div class="fc bl"><svg viewBox="0 0 120 120" fill="none"><path d="M10 110Q10 60 30 40Q50 20 60 10" stroke="#c9a84c" stroke-width="1.2" fill="none" opacity=".5"/><circle cx="30" cy="40" r="4" fill="#b76e79" opacity=".5"/><circle cx="15" cy="70" r="3" fill="#d4a0b0" opacity=".4"/><circle cx="50" cy="20" r="3.5" fill="#c9a84c" opacity=".4"/><path d="M20 90Q15 80 25 75" stroke="#6b8a5e" stroke-width="1" fill="none" opacity=".4"/><path d="M40 30Q45 25 38 20" stroke="#6b8a5e" stroke-width="1" fill="none" opacity=".4"/></svg></div>
+    <div class="fc br"><svg viewBox="0 0 120 120" fill="none"><path d="M10 110Q10 60 30 40Q50 20 60 10" stroke="#c9a84c" stroke-width="1.2" fill="none" opacity=".5"/><circle cx="30" cy="40" r="4" fill="#b76e79" opacity=".5"/><circle cx="15" cy="70" r="3" fill="#d4a0b0" opacity=".4"/><circle cx="50" cy="20" r="3.5" fill="#c9a84c" opacity=".4"/><path d="M20 90Q15 80 25 75" stroke="#6b8a5e" stroke-width="1" fill="none" opacity=".4"/><path d="M40 30Q45 25 38 20" stroke="#6b8a5e" stroke-width="1" fill="none" opacity=".4"/></svg></div>
+    <div class="floral-border"></div>
+
+    <canvas id="roseCanvas"></canvas>
+    <canvas id="sparkleCanvas"></canvas>
+    <canvas id="petalCanvas"></canvas>
+
+
+    <!-- ============================================================
+         PHASE 1: MIDNIGHT COUNTDOWN
+         ============================================================ -->
+    <section id="phase1" class="phase z-40">
+        <div id="countdownStage" class="flex flex-col items-center">
+            <p class="font-serif text-soft-pink tracking-[4px] uppercase mb-6 md:mb-8 opacity-80 text-center px-4" style="font-size:clamp(0.65rem,1.2vw,0.85rem)">
+                Counting down the seconds until your day begins...
+            </p>
+            <div class="flex items-center gap-2 md:gap-4">
+                <div class="text-center"><div id="cdD" class="font-serif font-light text-warm-gold" style="font-size:clamp(2rem,5vw,3.5rem);text-shadow:0 0 30px rgba(201,168,76,.3)">00</div><div class="text-rose-gold tracking-[3px] uppercase mt-1" style="font-size:clamp(0.55rem,1vw,0.7rem)">Days</div></div>
+                <span class="font-serif text-warm-gold opacity-40 mt-[-16px]" style="font-size:clamp(1.5rem,3vw,2.5rem)">:</span>
+                <div class="text-center"><div id="cdH" class="font-serif font-light text-warm-gold" style="font-size:clamp(2rem,5vw,3.5rem);text-shadow:0 0 30px rgba(201,168,76,.3)">00</div><div class="text-rose-gold tracking-[3px] uppercase mt-1" style="font-size:clamp(0.55rem,1vw,0.7rem)">Hours</div></div>
+                <span class="font-serif text-warm-gold opacity-40 mt-[-16px]" style="font-size:clamp(1.5rem,3vw,2.5rem)">:</span>
+                <div class="text-center"><div id="cdM" class="font-serif font-light text-warm-gold" style="font-size:clamp(2rem,5vw,3.5rem);text-shadow:0 0 30px rgba(201,168,76,.3)">00</div><div class="text-rose-gold tracking-[3px] uppercase mt-1" style="font-size:clamp(0.55rem,1vw,0.7rem)">Minutes</div></div>
+                <span class="font-serif text-warm-gold opacity-40 mt-[-16px]" style="font-size:clamp(1.5rem,3vw,2.5rem)">:</span>
+                <div class="text-center"><div id="cdS" class="font-serif font-light text-warm-gold" style="font-size:clamp(2rem,5vw,3.5rem);text-shadow:0 0 30px rgba(201,168,76,.3)">00</div><div class="text-rose-gold tracking-[3px] uppercase mt-1" style="font-size:clamp(0.55rem,1vw,0.7rem)">Seconds</div></div>
+            </div>
+        </div>
+    <!-- -->
+    </section>
+
+
+    <!-- ============================================================
+         PHASE 2: ANIMATED LETTER BANNER + CREAM-REVEAL CAKE
+         ============================================================ -->
+    <section id="phase2" class="phase z-40 off phase2-layout">
+
+        <!-- 3-Tier Cake — TOP (smallest) to BOTTOM (widest) -->
+        <div id="cakeWrap" class="relative flex flex-col items-center" style="opacity:0;transition:opacity .6s ease">
+
+            <!-- Smoke -->
+            <div id="smokeContainer" class="absolute left-1/2 -translate-x-1/2 pointer-events-none" style="top:0"></div>
+
+            <!-- Cake body: TOP (smallest) → BOTTOM (widest) -->
+            <div id="cakeBody" class="relative cursor-pointer flex flex-col items-center" onclick="blowCandles()" title="Tap to blow out candles" style="width:clamp(180px,30vw,240px)">
+
+                <!-- Candles (sits above top tier) -->
+                <div id="candlesWrap" class="candles-wrap absolute left-1/2 -translate-x-1/2 flex items-end gap-3 md:gap-5" style="top:-38px">
+                    <div class="flex flex-col items-center"><div class="flame w-2.5 h-4 rounded-full bg-gradient-to-t from-orange-400 via-yellow-300 to-yellow-100" style="filter:blur(.5px);margin-bottom:2px"></div><div class="w-1.5 h-6 bg-gradient-to-b from-pink-200 to-pink-300 rounded-t-sm candle-glow"></div></div>
+                    <div class="flex flex-col items-center"><div class="flame w-2.5 h-4 rounded-full bg-gradient-to-t from-orange-400 via-yellow-300 to-yellow-100" style="filter:blur(.5px);margin-bottom:2px;animation-delay:.1s"></div><div class="w-1.5 h-8 bg-gradient-to-b from-pink-200 to-pink-300 rounded-t-sm candle-glow" style="animation-delay:.3s"></div></div>
+                    <div class="flex flex-col items-center"><div class="flame w-2.5 h-4 rounded-full bg-gradient-to-t from-orange-400 via-yellow-300 to-yellow-100" style="filter:blur(.5px);margin-bottom:2px;animation-delay:.2s"></div><div class="w-1.5 h-9 bg-gradient-to-b from-pink-200 to-pink-300 rounded-t-sm candle-glow" style="animation-delay:.6s"></div></div>
+                    <div class="flex flex-col items-center"><div class="flame w-2.5 h-4 rounded-full bg-gradient-to-t from-orange-400 via-yellow-300 to-yellow-100" style="filter:blur(.5px);margin-bottom:2px;animation-delay:.15s"></div><div class="w-1.5 h-8 bg-gradient-to-b from-pink-200 to-pink-300 rounded-t-sm candle-glow" style="animation-delay:.45s"></div></div>
+                    <div class="flex flex-col items-center"><div class="flame w-2.5 h-4 rounded-full bg-gradient-to-t from-orange-400 via-yellow-300 to-yellow-100" style="filter:blur(.5px);margin-bottom:2px;animation-delay:.25s"></div><div class="w-1.5 h-6 bg-gradient-to-b from-pink-200 to-pink-300 rounded-t-sm candle-glow" style="animation-delay:.75s"></div></div>
+                </div>
+
+                <!-- TIER 3: Top (smallest) -->
+                <div id="tier3" class="tier" style="--spread-dur:.9s;--spread-delay:0s">
+                    <svg viewBox="0 0 130 48" class="tier-body w-full mx-auto" style="width:56%;filter:drop-shadow(0 3px 12px rgba(0,0,0,.25))">
+                        <defs><linearGradient id="t3d" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7a3545"/><stop offset="100%" stop-color="#6a2a3a"/></linearGradient></defs>
+                        <rect x="8" y="10" width="114" height="38" rx="5" fill="url(#t3d)"/>
+                    </svg>
+                    <svg viewBox="0 0 130 48" class="tier-cream" id="cream3" style="width:56%;left:22%">
+                        <defs><linearGradient id="cr1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f5e6d3"/><stop offset="100%" stop-color="#e8d5c0"/></linearGradient></defs>
+                        <path d="M8,12 Q20,5 40,11 Q60,17 80,9 Q100,4 115,11 L115,20 Q100,14 80,18 Q60,24 40,18 Q20,12 8,18Z" fill="url(#cr1)"/>
+                        <line x1="15" y1="32" x2="115" y2="32" stroke="#c9a84c" stroke-width="1" opacity=".25"/>
+                        <circle cx="28" cy="15" r="1.8" fill="#d4a0b0" opacity=".4"/><circle cx="55" cy="12" r="1.5" fill="#b76e79" opacity=".4"/><circle cx="80" cy="11" r="1.8" fill="#d4a0b0" opacity=".4"/><circle cx="105" cy="14" r="1.5" fill="#b76e79" opacity=".4"/>
+                    </svg>
+                </div>
+
+                <!-- TIER 2: Middle -->
+                <div id="tier2" class="tier" style="--spread-dur:1s;--spread-delay:0s;margin-top:-4px">
+                    <svg viewBox="0 0 180 55" class="tier-body w-full mx-auto" style="width:78%;filter:drop-shadow(0 4px 15px rgba(0,0,0,.3))">
+                        <defs><linearGradient id="t2d" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#6a2a3a"/><stop offset="100%" stop-color="#5a2030"/></linearGradient></defs>
+                        <rect x="10" y="12" width="160" height="43" rx="6" fill="url(#t2d)"/>
+                    </svg>
+                    <svg viewBox="0 0 180 55" class="tier-cream" id="cream2" style="width:78%;left:11%">
+                        <path d="M10,14 Q25,6 50,13 Q75,20 100,10 Q125,4 150,13 Q165,18 170,14 L170,24 Q150,18 130,24 Q110,30 90,22 Q70,16 50,24 Q30,30 10,24Z" fill="url(#cr1)"/>
+                        <line x1="18" y1="36" x2="162" y2="36" stroke="#c9a84c" stroke-width="1" opacity=".3"/>
+                        <circle cx="35" cy="18" r="2" fill="#d4a0b0" opacity=".4"/><circle cx="70" cy="14" r="1.8" fill="#b76e79" opacity=".45"/><circle cx="110" cy="12" r="2" fill="#d4a0b0" opacity=".4"/><circle cx="145" cy="16" r="1.8" fill="#b76e79" opacity=".45"/>
+                    </svg>
+                </div>
+
+                <!-- TIER 1: Bottom (widest) -->
+                <div id="tier1" class="tier" style="--spread-dur:1.1s;--spread-delay:0s;margin-top:-4px">
+                    <svg viewBox="0 0 240 65" class="tier-body w-full" style="filter:drop-shadow(0 6px 20px rgba(0,0,0,.4))">
+                        <defs><linearGradient id="t1d" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5a2030"/><stop offset="100%" stop-color="#4a1828"/></linearGradient></defs>
+                        <rect x="10" y="15" width="220" height="50" rx="8" fill="url(#t1d)"/>
+                    </svg>
+                    <svg viewBox="0 0 240 65" class="tier-cream" id="cream1">
+                        <path d="M10,18 Q30,8 60,15 Q90,22 120,12 Q150,5 180,15 Q210,22 230,18 L230,30 Q200,24 170,30 Q140,36 110,28 Q80,20 50,30 Q30,36 10,30Z" fill="url(#cr1)"/>
+                        <line x1="20" y1="44" x2="220" y2="44" stroke="#c9a84c" stroke-width="1.5" opacity=".35"/>
+                        <circle cx="40" cy="24" r="2.5" fill="#b76e79" opacity=".5"/><circle cx="80" cy="20" r="2" fill="#d4a0b0" opacity=".45"/><circle cx="120" cy="17" r="2.5" fill="#b76e79" opacity=".5"/><circle cx="160" cy="20" r="2" fill="#d4a0b0" opacity=".45"/><circle cx="200" cy="24" r="2.5" fill="#b76e79" opacity=".5"/>
+                    </svg>
+                </div>
+
+            </div>
+
+            <!-- Pedestal (bottom) -->
+            <div class="w-48 md:w-56 h-2 bg-gradient-to-r from-transparent via-warm-gold/20 to-transparent rounded-full mt-1"></div>
+            <div class="w-56 md:w-64 h-3 bg-gradient-to-r from-transparent via-warm-gold/30 to-transparent rounded-full"></div>
+        </div>
+
+        <!-- Wish prompt -->
+        <p id="wishPrompt" class="font-serif text-soft-pink tracking-[3px] uppercase opacity-0 transition-all duration-700" style="font-size:clamp(0.6rem,1.1vw,0.8rem)">
+            Make a wish and tap to blow out the candles
+        </p>
+    </section>
+
+
+    <!-- ============================================================
+         PHASE 3: FIREWORKS
+         ============================================================ -->
+    <section id="phase3" class="phase z-40 off phase2-layout">
+        <h1 id="hbTitle" class="absolute left-0 right-0 font-serif font-semibold text-warm-gold tracking-[6px] md:tracking-[10px] uppercase text-center opacity-0 transition-all duration-1000 pointer-events-none" style="top:clamp(2rem,8vh,5rem);font-size:clamp(2rem,6vw,4.5rem);text-shadow:0 0 40px rgba(201,168,76,.4),0 0 80px rgba(201,168,76,.15)">Happy Birthday Sonaa</h1>
+
+        <!-- Cake (no candles) -->
+        <div class="flex flex-col items-center mb-4 md:mb-6">
+            <div class="relative flex flex-col items-center" style="width:clamp(180px,30vw,240px)">
+                <svg viewBox="0 0 130 48" class="w-full mx-auto" style="width:56%;filter:drop-shadow(0 3px 12px rgba(0,0,0,.25))">
+                    <rect x="8" y="10" width="114" height="38" rx="5" fill="#6a2a3a"/>
+                    <path d="M8,12 Q20,5 40,11 Q60,17 80,9 Q100,4 115,11 L115,20 Q100,14 80,18 Q60,24 40,18 Q20,12 8,18Z" fill="#e8d5c0" opacity=".75"/>
+                </svg>
+                <svg viewBox="0 0 180 55" class="w-full mx-auto" style="width:78%;margin-top:-4px;filter:drop-shadow(0 4px 15px rgba(0,0,0,.3))">
+                    <rect x="10" y="12" width="160" height="43" rx="6" fill="#5a2030"/>
+                    <path d="M10,14 Q25,6 50,13 Q75,20 100,10 Q125,4 150,13 Q165,18 170,14 L170,24 Q150,18 130,24 Q110,30 90,22 Q70,16 50,24 Q30,30 10,24Z" fill="#e8d5c0" opacity=".8"/>
+                </svg>
+                <svg viewBox="0 0 240 65" class="w-full" style="filter:drop-shadow(0 6px 20px rgba(0,0,0,.4))">
+                    <rect x="10" y="15" width="220" height="50" rx="8" fill="#4a1828"/>
+                    <path d="M10,18 Q30,8 60,15 Q90,22 120,12 Q150,5 180,15 Q210,22 230,18 L230,30 Q200,24 170,30 Q140,36 110,28 Q80,20 50,30 Q30,36 10,30Z" fill="#e8d5c0" opacity=".85"/>
+                    <line x1="20" y1="44" x2="220" y2="44" stroke="#c9a84c" stroke-width="1.5" opacity=".3"/>
+                </svg>
+                <div class="w-48 md:w-56 h-2 bg-gradient-to-r from-transparent via-warm-gold/20 to-transparent rounded-full mt-1"></div>
+                <div class="w-56 md:w-64 h-3 bg-gradient-to-r from-transparent via-warm-gold/30 to-transparent rounded-full"></div>
+            </div>
+        </div>
+
+        <button id="openLetterBtn" onclick="goToLetter()" class="absolute bottom-8 left-0 right-0 mx-auto opacity-0 translate-y-5 transition-all duration-1000 bg-gradient-to-br from-burgundy/60 to-deep-rose/60 border border-warm-gold/40 text-warm-gold px-8 py-3 rounded-full font-serif tracking-[3px] uppercase cursor-pointer hover:shadow-[0_0_50px_rgba(201,168,76,.3)] hover:border-warm-gold w-fit" style="font-size:clamp(0.7rem,1.2vw,0.9rem);animation:softGlow 3s ease-in-out infinite">
+            <i class="fa-solid fa-envelope-open-text mr-2"></i> A Letter For You
+        </button>
+    </section>
+
+
+    <!-- ============================================================
+         PHASE 4: WAX-SEALED LETTER
+         ============================================================ -->
+    <section id="phase4" class="phase z-30 off">
+        <div id="envStage" class="relative cursor-pointer" onclick="breakSeal()">
+            <div class="relative w-[260px] md:w-[340px] h-[180px] md:h-[230px]">
+                <div class="absolute inset-0 bg-gradient-to-br from-[#e8a0b5] to-[#d4789a] border border-pink-300/40 rounded shadow-2xl"></div>
+                <div id="envFlap" class="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-br from-[#f0b0c5] to-[#e898b0] border border-pink-300/40 border-b-0 z-10 transition-transform duration-800 origin-top" style="clip-path:polygon(0 0,50% 100%,100% 0)"></div>
+                <div class="absolute top-[65%] left-1/2 -translate-x-1/2 z-5 text-center pointer-events-none">
+                    <p class="font-script text-[#5a1a30]" style="font-size:clamp(0.55rem,1.2vw,0.75rem)">To :</p>
+                    <p class="font-body text-[#5a1a30] leading-tight" style="font-size:clamp(0.5rem,1vw,0.65rem)">Parshimani</p>
+                    <p class="font-body text-[#5a1a30] leading-tight" style="font-size:clamp(0.5rem,1vw,0.65rem)">Jhargram, 721507</p>
+                </div>
+                <div id="waxSeal" class="absolute top-1/2 left-1/2 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center z-20 shadow-[0_4px_20px_rgba(200,80,120,.5)] transition-all duration-600 hover:scale-110" style="transform:translate(-50%,-50%);background:radial-gradient(circle at 35% 35%,#e06080,#c04060,#a03050);animation:sealWobble 3s ease-in-out infinite"><i class="fa-solid fa-heart text-white text-base md:text-lg" style="animation:heartBeat 1s ease-in-out infinite"></i></div>
+            </div>
+        </div>
+        <div id="letterBox" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-0 h-0 rounded overflow-hidden opacity-0 transition-all duration-1000 shadow-[0_30px_80px_rgba(0,0,0,.6)] z-10" style="max-width:90vw;max-height:80vh;background:linear-gradient(180deg,#fdf6f0 0%,#f5ebe0 100%)">
+            <button onclick="closeLetter()" class="absolute top-3 right-3 z-30 w-8 h-8 rounded-full bg-burgundy/80 text-white flex items-center justify-center hover:bg-burgundy transition-colors cursor-pointer" style="font-size:0.75rem"><i class="fa-solid fa-xmark"></i></button>
+            <div class="absolute top-2 left-2 right-2 bottom-2 border border-warm-gold/15 rounded pointer-events-none z-20"></div>
+            <div class="absolute top-3 left-3 text-warm-gold/20 text-lg"><i class="fa-solid fa-leaf"></i></div>
+            <div class="absolute top-3 right-3 text-warm-gold/20 text-lg"><i class="fa-solid fa-leaf" style="transform:scaleX(-1)"></i></div>
+            <div class="absolute bottom-3 left-3 text-warm-gold/20 text-lg"><i class="fa-solid fa-leaf" style="transform:scaleY(-1)"></i></div>
+            <div class="absolute bottom-3 right-3 text-warm-gold/20 text-lg"><i class="fa-solid fa-leaf" style="transform:scale(-1)"></i></div>
+            <div id="letterInner" class="p-6 md:p-8 h-full overflow-y-auto opacity-0 transition-opacity duration-800 delay-500 relative z-10" style="color:#2a1525">
+                <p class="font-script mb-4" style="font-size:clamp(1.5rem,3.5vw,2.25rem);color:#6b1d3a">Sagun Janam Maha Sonaa</p>
+                <div id="letterBody" class="font-body leading-[2] space-y-3" style="font-size:clamp(0.7rem,1.2vw,0.9rem);color:#3d2030">
+                    <!-- CONFIG: Change your personal letter text below -->
+                    <p class="opacity-0 translate-y-2 transition-all duration-700">Tehen nonka din aam adi besh te kataw me.</p>
+                    <p class="opacity-0 translate-y-2 transition-all duration-700">Aam ho baar chando por inj soman hoi en naam. Nethoh alang to mid ge hoi na-lang</p>
+                    <p class="opacity-0 translate-y-2 transition-all duration-700">Adi adi besh te tahen me sonaa, bhage thik te dactar benah tabon me. Inj ren bahu bhage dactar benah aai adi besh bujhaw inj sonaa.</p>
+                    <p class="opacity-0 translate-y-2 transition-all duration-700">Nel nel te amah bardhaw janam din manaw hoi naa inj salah, adi bhage bujhaw din.</p>
+                    <p class="opacity-0 translate-y-2 transition-all duration-700">R sonaa, isbar garibi itni hai ki apko kuch de na saka. Dene k liye aapko kuch din intezaar karni hogi. </p>
+                    <p class="opacity-0 translate-y-2 transition-all duration-700">Thik ache sonaa, adi adi adi adi Dulaar. Inah mon pereh dular aam lagid. Ontow gahir khon pereh preh r gaveh dular.</p>
+                </div>
+                <p class="font-script text-right mt-6" style="font-size:clamp(1.2rem,2.5vw,1.75rem);color:#8b2252">--Sara Jibon Amih<span class="text-warm-gold">&#10022;</span></p>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================
+         PHASE 5: GIFT BOX & FLORAL BLOOM
+         ============================================================ -->
+    <section id="phase5" class="phase z-20 off">
+        <p id="giftSub" class="font-serif text-rose-gold tracking-[4px] uppercase mb-6 md:mb-8 opacity-0 translate-y-3 transition-all duration-700" style="font-size:clamp(0.6rem,1vw,0.75rem)">A little something for you...</p>
+        <div id="giftRow" class="flex gap-6 md:gap-10 items-center justify-center flex-wrap opacity-0 translate-y-3 transition-all duration-700 delay-300">
+            <div class="flip-card" onclick="flipBouquet(this)">
+                <div class="flip-inner">
+                    <div class="flip-front"><i class="fa-solid fa-seedling text-soft-pink mb-2" style="font-size:clamp(2rem,4vw,3rem)"></i><span class="font-serif text-soft-pink tracking-[2px] uppercase" style="font-size:clamp(0.6rem,1vw,0.75rem)">Bouquet</span></div>
+                    <div class="flip-back"><img src="images/bouquet.jpg" alt="Bouquet"></div>
+                </div>
+            </div>
+            <div id="giftBox" onclick="openGiftBox()" class="w-32 h-40 md:w-40 md:h-48 bg-gradient-to-br from-warm-gold/15 to-rose-gold/15 border border-warm-gold/25 rounded-2xl flex flex-col items-center justify-center opacity-30 pointer-events-none transition-all duration-500" style="filter:grayscale(80%)"><i class="fa-solid fa-gift text-warm-gold mb-2" style="font-size:clamp(2rem,4vw,3rem)"></i><span class="font-serif text-warm-gold tracking-[2px] uppercase" style="font-size:clamp(0.6rem,1vw,0.75rem)">Gift</span></div>
+        </div>
+        <button onclick="goToMemory()" id="contBtn" class="mt-8 md:mt-10 border border-warm-gold/30 bg-warm-gold/10 text-warm-gold px-5 py-2 rounded-full font-serif tracking-[3px] uppercase cursor-pointer hover:bg-warm-gold/20 transition-all opacity-0 translate-y-3 transition-all duration-700 delay-500" style="font-size:clamp(0.6rem,1vw,0.75rem)">Continue <i class="fa-solid fa-arrow-right ml-1.5" style="font-size:0.8em"></i></button>
+    </section>
+
+    <!-- Reasons overlay -->
+    <div id="reasonsOv" class="absolute inset-0 bg-dark-bg/92 z-[200] flex items-center justify-center opacity-0 invisible transition-all duration-600">
+        <div class="bg-gradient-to-br from-[#1e1020] to-[#2a1525] border border-warm-gold/20 rounded-2xl p-6 md:p-8 max-w-sm w-[85vw] text-center relative">
+            <button onclick="closeReasons()" class="absolute top-3 right-4 text-rose-gold text-lg hover:text-warm-gold transition-colors"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="font-script text-warm-gold mb-4" style="font-size:clamp(1.5rem,3.5vw,2.25rem)">Dome Sokh!</h3>
+            <div id="reasonsList" class="text-left">
+                <!-- CONFIG: Change your reasons below -->
+                <p class="font-body text-soft-pink leading-relaxed" style="font-size:clamp(0.65rem,1.1vw,0.8rem)">
+						Phool r gift pore pabi akhon nai!!
+				</p>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ============================================================
+         PHASE 6: MEMORY FRAME & MUSIC PLAYER
+         ============================================================ -->
+    <section id="phase6" class="phase z-10 off">
+        <p class="font-serif text-rose-gold tracking-[4px] uppercase mb-1 md:mb-2" style="font-size:clamp(0.6rem,1vw,0.75rem)">Happy Birthday, My Love</p>
+        <p class="font-body text-soft-pink/70 mb-4 md:mb-6" style="font-size:clamp(0.55rem,0.9vw,0.7rem)">Celebrating the day you came into this world — and into my life</p>
+        <div class="relative">
+            <div class="absolute -top-4 -left-4 text-warm-gold/30 text-sm"><i class="fa-solid fa-leaf"></i></div>
+            <div class="absolute -top-4 -right-4 text-warm-gold/30 text-sm"><i class="fa-solid fa-leaf" style="transform:scaleX(-1)"></i></div>
+            <div class="absolute -bottom-4 -left-4 text-warm-gold/30 text-sm"><i class="fa-solid fa-leaf" style="transform:scaleY(-1)"></i></div>
+            <div class="absolute -bottom-4 -right-4 text-warm-gold/30 text-sm"><i class="fa-solid fa-leaf" style="transform:scale(-1)"></i></div>
+            <div class="absolute -top-3 left-1/2 -translate-x-1/2 text-warm-gold/20 text-xs"><i class="fa-solid fa-seedling"></i></div>
+            <div class="absolute -bottom-3 left-1/2 -translate-x-1/2 text-warm-gold/20 text-xs"><i class="fa-solid fa-seedling" style="transform:scaleY(-1)"></i></div>
+            <div class="bg-cream p-3 pb-10 shadow-[0_20px_60px_rgba(0,0,0,.5)] rotate-[-2deg] hover:rotate-0 transition-transform duration-600 max-w-[280px] md:max-w-sm w-[75vw]">
+                <div class="relative w-full aspect-[4/3] bg-gradient-to-br from-[#2a1525] to-[#1e1020] overflow-hidden">
+                    <!-- CONFIG: Place your photos in the images/ folder and update filenames below -->
+                    <img src="images/photo1.jpeg" alt="Memory 1" class="mimg absolute inset-0 w-full h-full object-cover opacity-100 transition-opacity duration-1000" data-i="0">
+                    <img src="images/photo2.jpeg" alt="Memory 2" class="mimg absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000" data-i="1">
+                    <img src="images/photo3.jpeg" alt="Memory 3" class="mimg absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000" data-i="2">
+                    <img src="images/photo4.jpeg" alt="Memory 4" class="mimg absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000" data-i="3">
+                </div>
+                <!-- CONFIG: Change photo captions -->
+                <p id="cap" class="font-script text-[#3d2030] text-center mt-2" style="font-size:clamp(0.9rem,2vw,1.25rem)">Every love story is beautiful, but ours is my favorite</p>
+            </div>
+        </div>
+        <div id="dots" class="flex gap-1.5 mt-4"></div>
+        <button onclick="goToGifts()" class="mt-5 border border-warm-gold/30 bg-warm-gold/10 text-warm-gold px-5 py-2 rounded-full font-serif tracking-[3px] uppercase cursor-pointer hover:bg-warm-gold/20 transition-all" style="font-size:clamp(0.6rem,1vw,0.75rem)"><i class="fa-solid fa-arrow-left mr-1.5"></i> Back</button>
+    </section>
+
+
+    <!-- Music Player -->
+    <div id="mPlayer" class="absolute bottom-4 right-4 bg-midnight/70 backdrop-blur-xl border border-warm-gold/15 rounded-xl px-4 py-2.5 flex items-center gap-2.5 z-[300] opacity-0 translate-y-3 transition-all duration-600">
+        <button onclick="toggleMusic()" class="text-warm-gold hover:scale-110 transition-transform"><i id="pIco" class="fa-solid fa-play text-xs"></i><i id="paIco" class="fa-solid fa-pause text-xs hidden"></i></button>
+        <div id="mBars" class="flex items-end gap-[2px] h-4"><span class="w-[2px] bg-warm-gold rounded-sm" style="height:6px;animation:musicBar .8s ease-in-out infinite alternate;animation-delay:0s"></span><span class="w-[2px] bg-warm-gold rounded-sm" style="height:12px;animation:musicBar .8s ease-in-out infinite alternate;animation-delay:.15s"></span><span class="w-[2px] bg-warm-gold rounded-sm" style="height:8px;animation:musicBar .8s ease-in-out infinite alternate;animation-delay:.3s"></span><span class="w-[2px] bg-warm-gold rounded-sm" style="height:14px;animation:musicBar .8s ease-in-out infinite alternate;animation-delay:.1s"></span></div>
+        <button onclick="toggleMute()" class="text-rose-gold hover:text-warm-gold transition-colors text-[10px]"><i id="vIco" class="fa-solid fa-volume-high"></i><i id="mIco" class="fa-solid fa-volume-xmark hidden"></i></button>
+        <span id="mLabel" class="font-serif text-[9px] text-rose-gold tracking-wider">Play</span>
+    </div>
+
+    <!-- CONFIG: Place your music file in the images/ folder (or same folder) and update filename below -->
+    <audio id="bgMusic" loop preload="auto" muted><source src="images/song.mp3" type="audio/mpeg"></audio>
+</div>
+
+<script>
+// ====================================================================
+// CONFIG: Change your target countdown date/time here
+// ====================================================================
+const TARGET = new Date('2026-08-01T00:00:00');
+
+// CONFIG: Photo captions
+const CAPS = [
+    "Another year of you being amazing — happy birthday, Sonaa",
+    "Today the world celebrates you, and I celebrate having you in my life",
+    "To the one who makes my heart skip a beat — happy birthday, beautiful",
+    "Here's to another year of making memories together — Love you Sonaa"
+];
+
+const $ = id => document.getElementById(id);
+
+
+/* ==========================================================
+   ROSE PETALS — continuous floating
+   ========================================================== */
+const rc = $('roseCanvas'), rctx = rc.getContext('2d');
+let rPetals = [];
+function szR(){rc.width=innerWidth;rc.height=innerHeight}
+szR(); addEventListener('resize',szR);
+
+class RP{
+    constructor(init){
+        this.x=Math.random()*innerWidth;
+        this.y=init?Math.random()*innerHeight:-15;
+        this.sz=Math.random()*14+8;
+        this.vy=Math.random()*.6+.2;
+        this.vx=(Math.random()-.5)*.4;
+        this.rot=Math.random()*360;
+        this.rs=(Math.random()-.5)*2;
+        this.w=Math.random()*Math.PI*2;
+        this.ws=Math.random()*.02+.005;
+        this.op=Math.random()*.35+.1;
+        const e=['\u{1F338}','\u{1F33A}','\u{1F337}','\u{1F4AE}','\u{1F33C}','\u{2764}\uFE0F','\u{1F49D}','\u{1F495}'];
+        this.em=e[Math.floor(Math.random()*e.length)];
+    }
+    update(){this.w+=this.ws;this.x+=this.vx+Math.sin(this.w)*.3;this.y+=this.vy;this.rot+=this.rs;if(this.y>innerHeight+20){this.x=Math.random()*innerWidth;this.y=-15}}
+    draw(c){c.save();c.globalAlpha=this.op;c.translate(this.x,this.y);c.rotate(this.rot*Math.PI/180);c.font=this.sz+'px serif';c.textAlign='center';c.textBaseline='middle';c.fillText(this.em,0,0);c.restore()}
+}
+for(let i=0;i<20;i++)rPetals.push(new RP(true));
+(function aR(){rctx.clearRect(0,0,rc.width,rc.height);for(const p of rPetals){p.update();p.draw(rctx)}requestAnimationFrame(aR)})();
+
+
+/* ==========================================================
+   FIREWORKS — bottom-launch, gold glitter, twinkle + gravity
+   ========================================================== */
+const sc = $('sparkleCanvas'), sctx = sc.getContext('2d');
+let fwParts = [], fwBoom = [], fwOn = false, fwRAF = null;
+
+function szS(){sc.width=innerWidth;sc.height=innerHeight}
+szS(); addEventListener('resize',szS);
+
+class FW{
+    constructor(explode){
+        if(explode){
+            this.burst=true;this.x=explode.x;this.y=explode.y;this.parts=[];this.age=0;
+            const count=60+Math.floor(Math.random()*40);
+            const cols=[[255,215,0],[255,0,0],[255,255,0],[255,255,255],[255,180,0],[255,60,60],[255,220,80],[200,200,255]];
+            for(let i=0;i<count;i++){
+                const ang=(Math.PI*2/count)*i;
+                const spd=Math.random()*6+2;
+                const col=cols[Math.floor(Math.random()*cols.length)];
+                this.parts.push({x:this.x,y:this.y,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,life:1,decay:Math.random()*.015+.008,sz:Math.random()*3+2,tw:Math.random()*6.28,tws:Math.random()*.2+.1,grav:.04+Math.random()*.02,r:col[0],g:col[1],b:col[2]});
+            }
+        } else {
+            this.burst=false;this.x=innerWidth*.15+Math.random()*innerWidth*.7;this.y=innerHeight+10;
+            this.tgt=innerHeight*.1+Math.random()*innerHeight*.2;this.vy=-(Math.random()*6+10);
+            this.sz=3;this.trail=[];
+        }
+    }
+    update(){
+        if(!this.burst){
+            this.trail.push({x:this.x,y:this.y,life:1});
+            if(this.trail.length>25)this.trail.shift();
+            for(const t of this.trail)t.life-=.04;
+            this.y+=this.vy;this.vy+=.07;
+            if(this.y<=this.tgt){
+                fwBoom.push(new FW({x:this.x,y:this.y}));
+                return false;
+            }
+            return true;
+        }
+        this.age++;
+        let alive=false;
+        for(const p of this.parts){
+            if(p.life<=0)continue;
+            alive=true;
+            p.x+=p.vx;p.y+=p.vy;p.vy+=p.grav;p.vx*=.99;
+            p.tw+=p.tws;p.life-=p.decay;
+        }
+        return alive;
+    }
+    draw(c){
+        if(!this.burst){
+            // Draw rocket trail
+            for(const t of this.trail){
+                if(t.life<=0)continue;
+                c.save();c.globalAlpha=t.life*.8;c.fillStyle='#ffd700';
+                c.shadowBlur=10;c.shadowColor='#ff8c00';
+                c.beginPath();c.arc(t.x,t.y,2.5*t.life,0,Math.PI*2);c.fill();c.restore();
+            }
+            // Rocket head
+            c.save();c.fillStyle='#fff';c.shadowBlur=25;c.shadowColor='#ffd700';
+            c.beginPath();c.arc(this.x,this.y,this.sz,0,Math.PI*2);c.fill();c.restore();
+        } else {
+            // Flash burst at start
+            if(this.age<8){
+                c.save();c.globalAlpha=(8-this.age)/8;c.fillStyle='#fff';
+                c.shadowBlur=80;c.shadowColor='rgba(255,215,0,1)';
+                c.beginPath();c.arc(this.x,this.y,40*(1-this.age/8)+5,0,Math.PI*2);c.fill();c.restore();
+            }
+            // Glitter particles
+            for(const p of this.parts){
+                if(p.life<=0)continue;
+                const tw=.5+.5*Math.sin(p.tw);
+                const a=p.life*tw;
+                if(a<.03)continue;
+                c.save();c.globalAlpha=a;
+                c.fillStyle=`rgb(${p.r},${p.g},${p.b})`;
+                c.shadowBlur=18;c.shadowColor=`rgb(${p.r},${p.g},${p.b})`;
+                c.beginPath();c.arc(p.x,p.y,p.sz*p.life,0,Math.PI*2);c.fill();
+                c.globalAlpha=a*.2;c.beginPath();c.arc(p.x,p.y,p.sz*p.life*3,0,Math.PI*2);c.fill();
+                c.restore();
+            }
+        }
+    }
+}
+
+function startFW(){
+    fwOn=true;sc.classList.add('on');let last=0;
+    (function loop(now){
+        if(!fwOn)return;
+        sctx.clearRect(0,0,sc.width,sc.height);
+        if(now-last>700+Math.random()*900){fwParts.push(new FW(false));last=now}
+        fwParts=fwParts.filter(p=>p.update());
+        // Merge any new explosions
+        if(fwBoom.length){fwParts=fwParts.concat(fwBoom);fwBoom=[]}
+        for(const p of fwParts)p.draw(sctx);
+        fwRAF=requestAnimationFrame(loop);
+    })(performance.now());
+}
+function stopFW(){fwOn=false;sc.classList.remove('on');if(fwRAF)cancelAnimationFrame(fwRAF);sctx.clearRect(0,0,sc.width,sc.height);fwParts=[];fwBoom=[]}
+
+
+/* ==========================================================
+   SMOKE + PUFF SOUND
+   ========================================================== */
+function puffSmoke(){
+    const cont=$('smokeContainer');
+    for(let i=0;i<8;i++){const s=document.createElement('div');s.style.cssText=`position:absolute;width:6px;height:6px;background:rgba(200,200,200,.5);border-radius:50%;left:${Math.random()*40-20}px;top:0;animation:smokeRise .8s ease-out forwards;animation-delay:${Math.random()*.2}s;pointer-events:none`;cont.appendChild(s);setTimeout(()=>s.remove(),1000)}
+}
+function playPuff(){try{const ac=new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.frequency.setValueAtTime(200,ac.currentTime);o.frequency.exponentialRampToValueAtTime(50,ac.currentTime+.15);g.gain.setValueAtTime(.15,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.2);o.start();o.stop(ac.currentTime+.2)}catch(e){}}
+
+
+/* ==========================================================
+   COUNTDOWN
+   ========================================================== */
+let cdInt;
+function updateCD(){
+    const d=TARGET.getTime()-Date.now();
+    if(d<=0){clearInterval(cdInt);triggerCountdownEnd();return}
+    $('cdD').textContent=String(Math.floor(d/864e5)).padStart(2,'0');
+    $('cdH').textContent=String(Math.floor(d%864e5/36e5)).padStart(2,'0');
+    $('cdM').textContent=String(Math.floor(d%36e5/6e4)).padStart(2,'0');
+    $('cdS').textContent=String(Math.floor(d%6e4/1e3)).padStart(2,'0');
+}
+function skipCD(){clearInterval(cdInt);const a=$('bgMusic');a.muted=false;a.volume=.3;a.play().then(()=>console.log('Music playing')).catch(e=>console.log('Music error:',e));triggerCountdownEnd()}
+
+
+/* ==========================================================
+   PHASE 1 → 2 TRANSITION
+   Timeline:
+   1000ms: Phase 2 visible, letters start
+   1400ms: Cake base fades in
+   1800ms: Tier1 cream spread (bottom, 1.1s)
+   2900ms: Tier2 cream spread (middle, 1.0s)
+   3900ms: Tier3 cream spread (top, 0.9s)
+   4800ms: Candles light
+   5300ms: Wish prompt
+   ========================================================== */
+function triggerCountdownEnd(){
+    const a=$('bgMusic');a.muted=false;a.volume=.3;a.play().catch(()=>{});
+    $('countdownStage').style.transition='opacity 1s';$('countdownStage').style.opacity='0';
+    setTimeout(()=>{
+        $('phase1').classList.add('off');$('phase2').classList.remove('off');
+        setTimeout(()=>{$('cakeWrap').style.opacity='1'},400);
+        // Cream spread bottom → top
+        setTimeout(()=>{$('cream1').classList.add('spreading')},800);
+        setTimeout(()=>{$('cream2').classList.add('spreading')},1900);
+        setTimeout(()=>{$('cream3').classList.add('spreading')},2900);
+        // Light candles
+        setTimeout(()=>{$('candlesWrap').classList.add('lit')},3800);
+        // Wish prompt
+        setTimeout(()=>$('wishPrompt').style.opacity='1',4300);
+    },1000);
+}
+
+
+/* ==========================================================
+   BLOW CANDLES
+   ========================================================== */
+function blowCandles(){
+    const flames=document.querySelectorAll('.flame');
+    $('wishPrompt').style.opacity='0';
+    flames.forEach((f,i)=>setTimeout(()=>f.classList.add('out'),i*120));
+    setTimeout(()=>{puffSmoke();playPuff()},flames.length*120);
+    setTimeout(()=>{$('cakeBody').style.animation='cakePulse .5s ease';setTimeout(()=>$('cakeBody').style.animation='',500)},flames.length*120+300);
+    setTimeout(()=>{
+        $('phase2').classList.add('off');$('phase3').classList.remove('off');startFW();
+        // Cracker reveal animation for Happy Birthday title
+        setTimeout(()=>$('hbTitle').classList.add('reveal'),800);
+        setTimeout(()=>{$('openLetterBtn').style.opacity='1';$('openLetterBtn').style.transform='translateY(0)'},3500);
+    },flames.length*120+1000);
+}
+
+
+/* ==========================================================
+   PHASE 4: LETTER
+   ========================================================== */
+function goToLetter(){stopFW();$('phase3').classList.add('off');setTimeout(()=>$('phase4').classList.remove('off'),800)}
+function breakSeal(){
+    $('waxSeal').style.transform='translate(-50%,-50%) scale(0) rotate(180deg)';$('waxSeal').style.opacity='0';
+    setTimeout(()=>{$('envFlap').style.transform='rotateX(180deg)'},400);
+    setTimeout(()=>{$('envStage').style.opacity='0';$('envStage').style.transition='opacity .6s'},800);
+    setTimeout(()=>{$('envStage').style.visibility='hidden';const lb=$('letterBox');lb.style.width='min(88vw,460px)';lb.style.height='min(78vh,560px)';lb.style.opacity='1'},1200);
+    setTimeout(()=>{$('letterInner').style.opacity='1';typeLetter()},1800);
+}
+function typeLetter(){const ps=document.querySelectorAll('#letterBody p');ps.forEach((p,i)=>setTimeout(()=>{p.style.opacity='1';p.style.transform='translateY(0)'},i*700))}
+function closeLetter(){$('letterBox').style.opacity='0';$('letterBox').style.transform='translate(-50%,-50%) scale(0.9)';setTimeout(()=>goToGifts(),500)}
+
+
+/* ==========================================================
+   PHASE 5: GIFTS
+   ========================================================== */
+function goToGifts(){
+    // Hide whichever phase is active
+    $('phase4').classList.add('off');
+    $('phase6').classList.add('off');
+    setTimeout(()=>{$('phase5').classList.remove('off');
+        setTimeout(()=>{$('giftSub').style.opacity='1';$('giftSub').style.transform='translateY(0)'},300);
+        setTimeout(()=>{$('giftRow').style.opacity='1';$('giftRow').style.transform='translateY(0)'},600);
+        setTimeout(()=>{$('contBtn').style.opacity='1';$('contBtn').style.transform='translateY(0)'},900);
+    },800);
+}
+function goToMemory(){$('phase5').classList.add('off');setTimeout(()=>{$('phase6').classList.remove('off');$('mPlayer').style.opacity='1';$('mPlayer').style.transform='translateY(0)';setupPolaroid()},800)}
+
+
+/* ==========================================================
+   FLOWER BLOOM
+   ========================================================== */
+const pc=$('petalCanvas'),pctx=pc.getContext('2d');
+let bPetals=[],bAnimating=false;
+function szP(){pc.width=innerWidth;pc.height=innerHeight}
+szP(); addEventListener('resize',szP);
+
+class BP{
+    constructor(fc){
+        const cx=innerWidth/2,cy=innerHeight/2;
+        if(fc){this.x=cx+(Math.random()-.5)*200;this.y=cy;this.vx=(Math.random()-.5)*5;this.vy=(Math.random()-.5)*5}
+        else{this.x=Math.random()*innerWidth;this.y=-10;this.vx=(Math.random()-.5)*1;this.vy=Math.random()*1.5+.5}
+        this.sz=Math.random()*8+4;this.rot=Math.random()*360;this.rs=(Math.random()-.5)*6;
+        this.life=1;this.decay=fc?.015:.008;
+        const cols=['#e8a0b5','#d4789a','#f0b0c5','#b76e79','#d4a0b0','#c9a84c'];
+        this.col=cols[Math.floor(Math.random()*cols.length)];
+    }
+    update(){this.x+=this.vx;this.y+=this.vy;this.rot+=this.rs;this.life-=this.decay}
+    draw(c){if(this.life<=0)return;c.save();c.globalAlpha=this.life*.8;c.translate(this.x,this.y);c.rotate(this.rot*Math.PI/180);c.fillStyle=this.col;c.beginPath();c.ellipse(0,0,this.sz,this.sz*.6,0,0,Math.PI*2);c.fill();c.restore()}
+}
+function bloomFlowers(){
+    bPetals=[];
+    for(let i=0;i<25;i++)bPetals.push(new BP(true));
+    let n=0;const iv=setInterval(()=>{for(let i=0;i<2;i++)bPetals.push(new BP(false));if(++n>15)clearInterval(iv)},100);
+    if(!bAnimating){bAnimating=true;(function a(){pctx.clearRect(0,0,pc.width,pc.height);bPetals=bPetals.filter(p=>p.life>0);for(const p of bPetals){p.update();p.draw(pctx)}if(bPetals.length>0)requestAnimationFrame(a);else{bAnimating=false;pctx.clearRect(0,0,pc.width,pc.height)}})()}
+}
+function flipBouquet(el){el.classList.toggle('flipped');setTimeout(bloomFlowers,300);setTimeout(()=>{const g=$('giftBox');g.style.opacity='1';g.style.pointerEvents='auto';g.style.filter='none';g.classList.add('hover:-translate-y-2','hover:shadow-[0_20px_50px_rgba(201,168,76,.2)]','hover:border-warm-gold','cursor-pointer')},800)}
+
+
+/* ==========================================================
+   GIFT BOX: Reasons
+   ========================================================== */
+function openGiftBox(){$('reasonsOv').classList.remove('invisible','opacity-0');$('reasonsOv').classList.add('visible','opacity-100');$('reasonsList').style.opacity='1';$('reasonsList').style.transform='translateY(0)'}
+function closeReasons(){$('reasonsList').style.opacity='0';$('reasonsList').style.transform='translateY(12px)';setTimeout(()=>{$('reasonsOv').classList.remove('visible','opacity-100');$('reasonsOv').classList.add('invisible','opacity-0')},400)}
+
+
+/* ==========================================================
+   PHASE 6: MEMORIES
+   ========================================================== */
+let cSlide=0;
+function setupPolaroid(){
+    const imgs=document.querySelectorAll('.mimg');const d=$('dots');d.innerHTML='';
+    imgs.forEach((_,i)=>{const el=document.createElement('div');el.className='w-1.5 h-1.5 rounded-full cursor-pointer transition-all duration-300 '+(i===0?'bg-warm-gold shadow-[0_0_8px_rgba(201,168,76,.5)]':'bg-warm-gold/30');el.onclick=()=>goSlide(i);d.appendChild(el)});
+    setInterval(()=>goSlide((cSlide+1)%imgs.length),4000);
+}
+function goSlide(i){
+    const imgs=document.querySelectorAll('.mimg'),dots=document.querySelectorAll('#dots > div');
+    imgs.forEach(im=>im.style.opacity='0');dots.forEach(d=>d.className='w-1.5 h-1.5 rounded-full cursor-pointer transition-all duration-300 bg-warm-gold/30');
+    imgs[i].style.opacity='1';dots[i].className='w-1.5 h-1.5 rounded-full cursor-pointer transition-all duration-300 bg-warm-gold shadow-[0_0_8px_rgba(201,168,76,.5)]';
+    $('cap').textContent=CAPS[i];cSlide=i;
+}
+
+
+/* ==========================================================
+   MUSIC PLAYER
+   ========================================================== */
+let mPlay=false,mMute=false;
+function toggleMusic(){const a=$('bgMusic');if(mPlay){a.pause();$('pIco').classList.remove('hidden');$('paIco').classList.add('hidden');$('mLabel').textContent='Play'}else{a.volume=mMute?0:.3;a.play().catch(()=>{});$('pIco').classList.add('hidden');$('paIco').classList.remove('hidden');$('mLabel').textContent='Playing'}mPlay=!mPlay}
+function toggleMute(){mMute=!mMute;$('bgMusic').muted=mMute;$('vIco').classList.toggle('hidden',mMute);$('mIco').classList.toggle('hidden',!mMute)}
+
+
+/* ==========================================================
+   INIT — wait for tap to unlock
+   ========================================================== */
+function unlockSite(){
+    $('unlockOverlay').style.opacity='0';$('unlockOverlay').style.pointerEvents='none';
+    setTimeout(()=>$('unlockOverlay').remove(),600);
+    const a=$('bgMusic');a.muted=false;a.volume=.3;
+    if(TARGET.getTime() <= Date.now()){
+        a.play().then(()=>console.log('Music playing (past target)')).catch(e=>console.log('Music error:',e));
+    }else{
+        a.play().then(()=>{a.pause();a.currentTime=0}).catch(()=>{});
+    }
+    cdInt=setInterval(updateCD,1000);updateCD();
+}
+
+// ====================================================================
+// CONFIG: Uncomment below to skip countdown on load for testing
+// ====================================================================
+// skipCD();
+</script>
+</body>
+</html>
